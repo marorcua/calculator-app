@@ -1,11 +1,12 @@
 /** @format */
 
 import { ChevronDown, ChevronUp } from 'lucide-react-native'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  FlatList,
-  ListRenderItemInfo,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View
@@ -35,15 +36,14 @@ export const NumberRoulette = ({
   format = (v) => `$${v.toLocaleString()}`,
   error
 }: NumberRouletteProps) => {
-  const listRef = useRef<FlatList>(null)
-  const isScrolling = useRef(false)
+  const scrollRef = useRef<ScrollView>(null)
 
-  // Build the full list of selectable values
   const items = useMemo(() => {
     const result: number[] = []
     for (let v = min; v <= max; v += step) result.push(v)
     return result
   }, [min, max, step])
+
   const indexForValue = useCallback(
     (v: number) => {
       const raw = Math.round((v - min) / step)
@@ -51,107 +51,93 @@ export const NumberRoulette = ({
     },
     [min, step, items.length]
   )
-  const [centeredIndex, setCenteredIndex] = useState(() => indexForValue(value))
 
-  // Pad with nulls so the selected item always centers in the window
-  const paddedItems = useMemo(
-    () => [
-      ...Array(SIDE_ITEMS).fill(null),
-      ...items,
-      ...Array(SIDE_ITEMS).fill(null)
-    ],
-    [items]
-  )
+  const [centeredIndex, setCenteredIndex] = useState(() => {
+    const raw = Math.round((value - min) / step)
+    return Math.max(0, Math.min(Math.floor((max - min) / step), raw))
+  })
+  
+  // Use a ref for immediate access to current index
+  const indexRef = useRef(centeredIndex);
+  
+  useEffect(() => {
+    indexRef.current = centeredIndex;
+  }, [centeredIndex]);
+
+  // Scroll to initial value once the layout is ready
+  useEffect(() => {
+    const idx = indexForValue(value)
+    setCenteredIndex(idx);
+    indexRef.current = idx;
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: idx * ITEM_HEIGHT, animated: false })
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [value]) // Added value as dependency
 
   const scrollToIndex = useCallback((index: number, animated = true) => {
-    listRef.current?.scrollToIndex({
-      index: index + SIDE_ITEMS,
-      animated,
-      viewOffset: 0
-    })
+    scrollRef.current?.scrollTo({ y: index * ITEM_HEIGHT, animated })
   }, [])
 
+  const lastEmittedValue = useRef<number>(value);
+
   const handleScroll = useCallback(
-    (e: any) => {
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetY = e.nativeEvent.contentOffset.y
       const idx = Math.max(
         0,
         Math.min(items.length - 1, Math.round(offsetY / ITEM_HEIGHT))
       )
-      setCenteredIndex(idx)
+      if (idx !== indexRef.current) {
+        setCenteredIndex(idx)
+        indexRef.current = idx;
+        
+        // Update value during scroll if it changed
+        if (items[idx] !== lastEmittedValue.current) {
+          lastEmittedValue.current = items[idx];
+          onChange(items[idx]);
+        }
+      }
     },
-    [items.length]
+    [items, onChange]
   )
 
   const handleScrollEnd = useCallback(
-    (e: any) => {
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetY = e.nativeEvent.contentOffset.y
-      const clampedIndex = Math.max(
+      const idx = Math.max(
         0,
         Math.min(items.length - 1, Math.round(offsetY / ITEM_HEIGHT))
       )
-      scrollToIndex(clampedIndex, true)
-      setCenteredIndex(clampedIndex)
-      onChange(items[clampedIndex])
-      isScrolling.current = false
+      if (idx !== indexRef.current) {
+        setCenteredIndex(idx)
+        indexRef.current = idx;
+      }
+      
+      // Ensure we final-sync
+      if (items[idx] !== lastEmittedValue.current) {
+        lastEmittedValue.current = items[idx];
+        onChange(items[idx]);
+      }
     },
-    [items, onChange, scrollToIndex]
+    [items, onChange]
   )
 
   const handleIncrement = useCallback(() => {
-    const current = indexForValue(value)
-    const next = Math.min(items.length - 1, current + 1)
+    const next = Math.min(items.length - 1, indexRef.current + 1)
     scrollToIndex(next)
     setCenteredIndex(next)
+    indexRef.current = next;
     onChange(items[next])
-  }, [value, items, indexForValue, scrollToIndex, onChange])
+  }, [items, scrollToIndex, onChange])
 
   const handleDecrement = useCallback(() => {
-    const current = indexForValue(value)
-    const prev = Math.max(0, current - 1)
+    const prev = Math.max(0, indexRef.current - 1)
     scrollToIndex(prev)
     setCenteredIndex(prev)
+    indexRef.current = prev;
     onChange(items[prev])
-  }, [value, items, indexForValue, scrollToIndex, onChange])
-
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<number | null>) => {
-      if (item === null) return <View style={{ height: ITEM_HEIGHT }} />
-      const realIndex = index - SIDE_ITEMS
-      const distance = Math.abs(realIndex - centeredIndex)
-      return (
-        <View style={styles.item}>
-          <Text
-            style={[
-              styles.itemText,
-              distance === 0 && styles.itemTextActive,
-              distance === 1 && styles.itemTextNear,
-              distance >= 2 && styles.itemTextFar
-            ]}
-          >
-            {format(item)}
-          </Text>
-        </View>
-      )
-    },
-    [centeredIndex, format]
-  )
-
-  const getItemLayout = useCallback(
-    (_: any, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: ITEM_HEIGHT * index,
-      index
-    }),
-    []
-  )
-
-  const initialScrollIndex = useMemo(
-    () => indexForValue(value) + SIDE_ITEMS,
-    // only compute once at mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+  }, [items, scrollToIndex, onChange])
 
   return (
     <View>
@@ -161,7 +147,7 @@ export const NumberRoulette = ({
           error ? styles.containerError : styles.containerNormal
         ]}
       >
-        {/* Up button */}
+        {/* Up / decrement button */}
         <Pressable
           onPress={handleDecrement}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
@@ -173,49 +159,57 @@ export const NumberRoulette = ({
           />
         </Pressable>
 
-        {/* Scroll window */}
-        <View
-          style={styles.window}
-          pointerEvents='box-none'
-        >
-          {/* Selection highlight */}
+        {/* Picker window */}
+        <View style={styles.window}>
+          {/* Center highlight bar */}
           <View
             style={styles.selectionBar}
             pointerEvents='none'
           />
 
-          {/* Fade overlays */}
-          <View
-            style={[styles.fade, styles.fadeTop]}
-            pointerEvents='none'
-          />
-          <View
-            style={[styles.fade, styles.fadeBottom]}
-            pointerEvents='none'
-          />
-
-          <FlatList
-            ref={listRef}
-            data={paddedItems as (number | null)[]}
-            keyExtractor={(_, i) => String(i)}
-            renderItem={renderItem}
-            getItemLayout={getItemLayout}
-            initialScrollIndex={initialScrollIndex}
-            snapToInterval={ITEM_HEIGHT}
-            decelerationRate='fast'
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scroll}
+            contentContainerStyle={{
+              paddingVertical: ITEM_HEIGHT * SIDE_ITEMS
+            }}
             showsVerticalScrollIndicator={false}
-            onScroll={handleScroll}
+            snapToOffsets={items.map((_, i) => i * ITEM_HEIGHT)}
+            snapToAlignment='center'
+            decelerationRate='fast'
             scrollEventThrottle={16}
+            onScroll={handleScroll}
             onScrollEndDrag={handleScrollEnd}
             onMomentumScrollEnd={handleScrollEnd}
             bounces={false}
             overScrollMode='never'
-            style={styles.list}
-            contentContainerStyle={styles.listContent}
-          />
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            {items.map((item, index) => {
+              const distance = Math.abs(index - centeredIndex)
+              return (
+                <View
+                  key={item}
+                  style={styles.item}
+                >
+                  <Text
+                    style={[
+                      styles.itemText,
+                      distance === 0 && styles.itemTextActive,
+                      distance === 1 && styles.itemTextNear,
+                      distance >= 2 && styles.itemTextFar
+                    ]}
+                  >
+                    {format(item)}
+                  </Text>
+                </View>
+              )
+            })}
+          </ScrollView>
         </View>
 
-        {/* Down button */}
+        {/* Down / increment button */}
         <Pressable
           onPress={handleIncrement}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
@@ -254,8 +248,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: CONTAINER_HEIGHT,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent'
+    justifyContent: 'center'
   },
   btnPressed: {
     backgroundColor: '#f3f4f6'
@@ -263,37 +256,10 @@ const styles = StyleSheet.create({
   window: {
     flex: 1,
     height: CONTAINER_HEIGHT,
-    overflow: 'hidden',
-    position: 'relative'
+    overflow: 'hidden'
   },
-  list: {
+  scroll: {
     flex: 1
-  },
-  listContent: {
-    // no extra padding needed — padding is handled by null items
-  },
-  item: {
-    height: ITEM_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  itemText: {
-    fontSize: 22,
-    fontWeight: '500',
-    color: '#111827'
-  },
-  itemTextActive: {
-    fontSize: 26,
-    fontWeight: '600',
-    color: '#111827'
-  },
-  itemTextNear: {
-    fontSize: 18,
-    color: '#6b7280'
-  },
-  itemTextFar: {
-    fontSize: 14,
-    color: '#d1d5db'
   },
   selectionBar: {
     position: 'absolute',
@@ -303,24 +269,34 @@ const styles = StyleSheet.create({
     height: ITEM_HEIGHT,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-    borderRadius: 6,
-    zIndex: 1
-  },
-  fade: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: ITEM_HEIGHT * SIDE_ITEMS,
-    zIndex: 2,
+    borderColor: '#d1d5db',
+    zIndex: 1,
     pointerEvents: 'none'
   },
-  fadeTop: {
-    top: 0
-    // gradient via background not available in RN — use opacity on items instead (handled in text styles)
+  item: {
+    height: ITEM_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  fadeBottom: {
-    bottom: 0
+  itemText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#d1d5db'
+  },
+  itemTextActive: {
+    fontSize: 26,
+    fontWeight: '600',
+    color: '#111827'
+  },
+  itemTextNear: {
+    fontSize: 20,
+    fontWeight: '400',
+    color: '#6b7280'
+  },
+  itemTextFar: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#d1d5db'
   },
   error: {
     fontSize: 12,
