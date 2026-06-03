@@ -89,18 +89,17 @@ export default function InterestScreen() {
 
         {/* Input Card */}
         <View className='bg-white p-8 rounded-3xl shadow-lg mb-6 border border-blue-100'>
-          {/* Principal with Roulette */}
           <View className='mb-8'>
             <Text className='text-sm font-bold text-gray-600 mb-4 ml-1 uppercase tracking-wide'>
               Initial Amount
             </Text>
             <NumberRoulette
               value={data.principal}
-              onChangeText={(v) => updateField('principal', v)}
+              onChange={(v) => updateField('principal', v)}
               onIncrement={incrementPrincipal}
               onDecrement={decrementPrincipal}
               placeholder='$0.00'
-              step={10000}
+              step={5000}
               error={getPrincipalError}
             />
           </View>
