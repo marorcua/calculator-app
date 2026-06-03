@@ -1,16 +1,32 @@
-import React from 'react';
-import { View, Text, TextInput, ScrollView, SafeAreaView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, SafeAreaView, Pressable } from 'react-native';
 import { usePersistence } from '@/hooks/usePersistence';
 import { calculateMonthlyPayment, formatCurrency } from '@/utils/math';
-import { Landmark } from 'lucide-react-native';
+import { Landmark, Settings2 } from 'lucide-react-native';
+import { NumberRoulette } from '@/components/NumberRoulette';
+import { InputField } from '@/components/InputField';
 
 export default function LoansScreen() {
   const [data, setData, isLoaded] = usePersistence('loan_data', {
-    amount: '',
-    rate: '',
-    years: '',
+    amount: '10000',
+    rate: '5',
+    years: '10',
   });
+  const [showConditions, setShowConditions] = useState(false);
 
+  // Define callback hooks before any early returns
+  const updateField = useCallback((field: string, value: string) => {
+    setData({ ...data, [field]: value });
+  }, [data, setData]);
+
+  const handleAmountChange = useCallback(
+    (val: number) => {
+      updateField('amount', String(val));
+    },
+    [updateField]
+  );
+
+  // Early return after all hooks are defined
   if (!isLoaded) return null;
 
   const amount = parseFloat(data.amount) || 0;
@@ -20,10 +36,6 @@ export default function LoansScreen() {
   const monthlyPayment = calculateMonthlyPayment(amount, rate, years);
   const totalPayment = monthlyPayment * years * 12;
   const totalInterest = totalPayment - amount;
-
-  const updateField = (field: string, value: string) => {
-    setData({ ...data, [field]: value });
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -36,40 +48,43 @@ export default function LoansScreen() {
             <Text className="text-2xl font-bold text-gray-800">Loan Calculator</Text>
           </View>
 
-          <View className="space-y-4">
-            <View>
-              <Text className="text-sm font-medium text-gray-500 mb-1 ml-1">Loan Amount ($)</Text>
-              <TextInput
-                className="bg-gray-50 p-4 rounded-2xl text-lg font-semibold text-gray-800 border border-gray-200"
-                placeholder="0.00"
-                keyboardType="numeric"
-                value={data.amount}
-                onChangeText={(v) => updateField('amount', v)}
-              />
-            </View>
+          <View className="mb-6">
+            <Text className="text-sm font-medium text-gray-500 mb-2 ml-1">Loan Amount</Text>
+            <NumberRoulette
+              value={amount}
+              onChange={handleAmountChange}
+              min={0}
+              max={1000000}
+              step={5000}
+            />
+          </View>
 
+          <Pressable
+            onPress={() => setShowConditions(!showConditions)}
+            className="flex-row items-center mb-6 p-3 rounded-xl bg-emerald-50 border border-emerald-100"
+          >
+            <Settings2 size={20} color="#10b981" style={{ marginRight: 8 }} />
+            <Text className="text-emerald-700 font-semibold">
+              {showConditions ? 'Hide Conditions' : 'Show Conditions'}
+            </Text>
+          </Pressable>
+
+          {showConditions && (
             <View>
-              <Text className="text-sm font-medium text-gray-500 mb-1 ml-1">Annual Rate (%)</Text>
-              <TextInput
-                className="bg-gray-50 p-4 rounded-2xl text-lg font-semibold text-gray-800 border border-gray-200"
-                placeholder="0.00"
-                keyboardType="numeric"
+              <InputField
+                label="Annual Rate (%)"
                 value={data.rate}
                 onChangeText={(v) => updateField('rate', v)}
-              />
-            </View>
-
-            <View>
-              <Text className="text-sm font-medium text-gray-500 mb-1 ml-1">Loan Term (Years)</Text>
-              <TextInput
-                className="bg-gray-50 p-4 rounded-2xl text-lg font-semibold text-gray-800 border border-gray-200"
-                placeholder="0"
                 keyboardType="numeric"
+              />
+              <InputField
+                label="Loan Term (Years)"
                 value={data.years}
                 onChangeText={(v) => updateField('years', v)}
+                keyboardType="numeric"
               />
             </View>
-          </View>
+          )}
         </View>
 
         <View className="bg-emerald-600 p-8 rounded-3xl shadow-md items-center mb-4">
