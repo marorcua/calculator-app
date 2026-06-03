@@ -3,7 +3,7 @@ import React from 'react';
 import { PiggyBank, Landmark } from 'lucide-react-native';
 
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColorScheme } from '@/src/ui/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -17,7 +17,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Interest',
+          title: 'Investment',
           tabBarIcon: ({ color }) => <PiggyBank size={24} color={color} />,
         }}
       />

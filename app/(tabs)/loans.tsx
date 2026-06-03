@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, Pressable } from 'react-native';
-import { usePersistence } from '@/hooks/usePersistence';
-import { calculateMonthlyPayment, formatCurrency } from '@/utils/math';
+import { usePersistence } from '@/src/infrastructure/persistence/usePersistence';
+import { calculateMonthlyPayment, formatCurrency } from '@/src/domain/math/math';
 import { Landmark, Settings2 } from 'lucide-react-native';
 import { NumberRoulette } from '@/components/NumberRoulette';
 import { InputField } from '@/components/InputField';

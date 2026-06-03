@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { CalculatorData, CalculationResult, COMPOUNDING_FREQUENCY_MAP } from '@/types/calculator';
-import { calculateCompoundInterest, generateYearlyBreakdown } from '@/utils/math';
+import { CalculatorData, CalculationResult, COMPOUNDING_FREQUENCY_MAP } from '@/src/domain/models/calculator';
+import { calculateCompoundInterest, generateYearlyBreakdown } from '@/src/domain/math/math';
 
 export const useCompoundInterestCalculator = (data: CalculatorData): CalculationResult => {
   return useMemo(() => {

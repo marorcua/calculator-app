@@ -13,7 +13,7 @@ import 'react-native-reanimated'
 import '../global.css'
 import '../shims/polyfills'
 
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useColorScheme } from '@/src/ui/hooks/useColorScheme'
 import React from 'react'
 
 export {

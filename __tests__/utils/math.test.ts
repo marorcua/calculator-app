@@ -1,4 +1,4 @@
-import { calculateCompoundInterest, generateYearlyBreakdown, formatCurrency } from '@/utils/math';
+import { calculateCompoundInterest, generateYearlyBreakdown, formatCurrency } from '@/src/domain/math/math';
 
 describe('Math Utilities', () => {
   describe('calculateCompoundInterest', () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Pressable, Text, ScrollView } from 'react-native';
-import { CompoundingFrequency, FREQUENCY_LABELS } from '@/types/calculator';
+import { CompoundingFrequency, FREQUENCY_LABELS } from '@/src/domain/models/calculator';
 
 interface FrequencySelectorProps {
   value: CompoundingFrequency;

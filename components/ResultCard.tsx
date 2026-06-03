@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import { formatCurrency } from '@/utils/math';
-import { CalculationResult } from '@/types/calculator';
+import { formatCurrency } from '@/src/domain/math/math';
+import { CalculationResult } from '@/src/domain/models/calculator';
+
 
 interface ResultCardProps {
   result: CalculationResult;

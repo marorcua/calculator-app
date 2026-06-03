@@ -1,4 +1,4 @@
-import { CalculatorData, ValidationError } from '@/types/calculator';
+import { CalculatorData, ValidationError } from '@/src/domain/models/calculator';
 
 const CONSTRAINTS = {
   principal: { min: 0, max: 10_000_000 },

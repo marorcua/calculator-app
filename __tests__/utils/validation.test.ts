@@ -1,5 +1,5 @@
-import { validateCalculatorData, hasErrors, getFieldError } from '@/utils/validation';
-import { CalculatorData } from '@/types/calculator';
+import { validateCalculatorData, hasErrors, getFieldError } from '@/src/domain/validation/validation';
+import { CalculatorData } from '@/src/domain/models/calculator';
 
 describe('Validation Utilities', () => {
   describe('validateCalculatorData', () => {

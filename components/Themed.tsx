@@ -7,7 +7,7 @@
 
 import { Text as DefaultText, View as DefaultView } from 'react-native'
 
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useColorScheme } from '@/src/ui/hooks/useColorScheme'
 
 import Colors from '@/constants/Colors'
 
