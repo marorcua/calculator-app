@@ -3,7 +3,7 @@ import React from 'react';
 import { PiggyBank, Landmark } from 'lucide-react-native';
 
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
