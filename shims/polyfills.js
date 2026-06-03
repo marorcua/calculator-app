@@ -1,7 +1,7 @@
 /** @format */
 
-import { ReadableStream } from 'web-streams-polyfill'
+import { ReadableStream } from "web-streams-polyfill";
 
 if (!global.ReadableStream) {
-  global.ReadableStream = ReadableStream
+  global.ReadableStream = ReadableStream;
 }

@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, Pressable, Text } from 'react-native';
+import React from "react";
+import { View, Pressable, Text } from "react-native";
 
 interface PresetButtonsProps {
   onSelect: (amount: number) => void;
 }
 
 const PRESETS = [
-  { label: '$50k', value: 50000 },
-  { label: '$100k', value: 100000 },
-  { label: '$500k', value: 500000 },
+  { label: "$50k", value: 50000 },
+  { label: "$100k", value: 100000 },
+  { label: "$500k", value: 500000 },
 ];
 
 export const PresetButtons = ({ onSelect }: PresetButtonsProps) => {
@@ -20,7 +20,9 @@ export const PresetButtons = ({ onSelect }: PresetButtonsProps) => {
           onPress={() => onSelect(preset.value)}
           className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-3 rounded-xl active:opacity-80"
         >
-          <Text className="text-white font-bold text-center">{preset.label}</Text>
+          <Text className="text-white font-bold text-center">
+            {preset.label}
+          </Text>
         </Pressable>
       ))}
     </View>

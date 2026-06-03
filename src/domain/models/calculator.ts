@@ -1,4 +1,4 @@
-export type CompoundingFrequency = 'daily' | 'monthly' | 'quarterly' | 'yearly';
+export type CompoundingFrequency = "daily" | "monthly" | "quarterly" | "yearly";
 
 export interface CalculatorData {
   principal: string;
@@ -33,8 +33,8 @@ export const COMPOUNDING_FREQUENCY_MAP: Record<CompoundingFrequency, number> = {
 };
 
 export const FREQUENCY_LABELS: Record<CompoundingFrequency, string> = {
-  daily: 'Daily',
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  yearly: 'Yearly',
+  daily: "Daily",
+  monthly: "Monthly",
+  quarterly: "Quarterly",
+  yearly: "Yearly",
 };

@@ -4,7 +4,12 @@
     "jsx": "react",
     "strict": true,
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/domain/*": ["./src/domain/*"],
+      "@/application/*": ["./src/application/*"],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/components/*": ["./src/ui/components/*"],
+      "@/ui/*": ["./src/ui/*"]
     }
   },
   "include": [

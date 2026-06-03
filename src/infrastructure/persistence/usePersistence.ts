@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect, useMemo } from "react";
+import { Repository } from "@/domain/repositories/Repository";
+import { AsyncStorageRepository } from "@/infrastructure/persistence/AsyncStorageRepository";
 
 export function usePersistence<T>(key: string, initialValue: T) {
+  const repository = useMemo(() => new AsyncStorageRepository<T>(key), [key]);
   const [state, setState] = useState<T>(initialValue);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load data from AsyncStorage on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const savedValue = await AsyncStorage.getItem(key);
+        const savedValue = await repository.load();
         if (savedValue !== null) {
-          setState(JSON.parse(savedValue));
+          setState(savedValue);
         }
       } catch (error) {
         console.error(`Error loading persistence key "${key}":`, error);
@@ -21,22 +22,21 @@ export function usePersistence<T>(key: string, initialValue: T) {
     };
 
     loadData();
-  }, [key]);
+  }, [key, repository]);
 
-  // Save data to AsyncStorage whenever state changes
   useEffect(() => {
     if (!isLoaded) return;
 
     const saveData = async () => {
       try {
-        await AsyncStorage.setItem(key, JSON.stringify(state));
+        await repository.save(state);
       } catch (error) {
         console.error(`Error saving persistence key "${key}":`, error);
       }
     };
 
     saveData();
-  }, [key, state, isLoaded]);
+  }, [key, state, isLoaded, repository]);
 
   return [state, setState, isLoaded] as const;
 }

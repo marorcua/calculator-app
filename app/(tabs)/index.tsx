@@ -1,87 +1,50 @@
 /** @format */
-import { FrequencySelector } from '@/components/FrequencySelector'
-import { InputField } from '@/components/InputField'
-import { NumberRoulette } from '@/components/NumberRoulette'
-import { PresetButtons } from '@/components/PresetButtons'
-import { ResultCard } from '@/components/ResultCard'
-import { useCompoundInterestCalculator } from '@/src/application/hooks/useCompoundInterestCalculator'
-import { usePersistence } from '@/src/infrastructure/persistence/usePersistence'
-import { CalculatorData, CompoundingFrequency } from '@/src/domain/models/calculator'
-import { validateCalculatorData } from '@/src/domain/validation/validation'
+import { FrequencySelector } from "@/ui/components/FrequencySelector";
+import { InputField } from "@/ui/components/InputField";
+import { NumberRoulette } from "@/ui/components/NumberRoulette";
+import { ResultCard } from "@/ui/components/ResultCard";
+import { useInterestCalculatorController } from "@/ui/hooks/useInterestCalculatorController";
 
-import { PiggyBank, Settings2 } from 'lucide-react-native'
-import React, { useCallback, useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { PiggyBank, Settings2 } from "lucide-react-native";
+import React from "react";
+import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 
 export default function InterestScreen() {
-  const [data, setData, isLoaded] = usePersistence<CalculatorData>(
-    'interest_data',
-    {
-      principal: '10000',
-      rate: '5',
-      years: '10',
-      frequency: 'monthly'
-    }
-  )
-  const [showConditions, setShowConditions] = useState(false);
+  const {
+    data,
+    isLoaded,
+    showConditions,
+    setShowConditions,
+    result,
+    principal,
+    updateField,
+    handlePrincipalChange,
+    handleFrequencyChange,
+    getFieldError,
+  } = useInterestCalculatorController();
 
-  const result = useCompoundInterestCalculator(data)
-  const errors = validateCalculatorData(data)
-  const principal = parseFloat(data.principal) || 0
-
-  const updateField = useCallback(
-    (field: keyof CalculatorData, value: string) => {
-      setData({ ...data, [field]: value })
-    },
-    [data, setData]
-  )
-
-  const handlePrincipalChange = useCallback(
-    (val: number) => {
-      updateField('principal', String(val))
-    },
-    [updateField]
-  )
-
-  const handleFrequencyChange = useCallback(
-    (freq: CompoundingFrequency) => {
-      updateField('frequency', freq)
-    },
-    [updateField]
-  )
-
-  if (!isLoaded) return null
-
-  const getPrincipalError = errors.find((e) => e.field === 'principal')?.message
-  const getRateError = errors.find((e) => e.field === 'rate')?.message
-  const getYearsError = errors.find((e) => e.field === 'years')?.message
+  if (!isLoaded) return null;
 
   return (
-    <View className='flex-1 bg-gradient-to-br from-blue-50 to-indigo-100'>
-      <ScrollView
-        className='p-6'
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView className="flex-1 bg-blue-50">
+      <ScrollView className="p-6" showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View className='flex-row items-center mb-8'>
-          <View className='bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-2xl mr-4'>
-            <PiggyBank
-              size={28}
-              color='white'
-            />
+        <View className="flex-row items-center mb-8">
+          <View className="bg-blue-600 p-4 rounded-2xl mr-4">
+            <PiggyBank size={28} color="white" />
           </View>
           <View>
-            <Text className='text-3xl font-bold text-gray-900'>Investment</Text>
-            <Text className='text-sm text-gray-600'>
+            <Text className="text-3xl font-bold text-gray-900">Investment</Text>
+            <Text className="text-sm text-gray-600">
               Calculate your savings growth
             </Text>
           </View>
         </View>
 
         {/* Input Card */}
-        <View className='bg-white p-8 rounded-3xl shadow-lg mb-6 border border-blue-100'>
-          <View className='mb-8'>
-            <Text className='text-sm font-bold text-gray-600 mb-4 ml-1 uppercase tracking-wide'>
+        <View className="bg-white p-8 rounded-3xl shadow-sm mb-6 border border-gray-100">
+          <View className="mb-8">
+            <Text className="text-sm font-bold text-gray-600 mb-4 ml-1 uppercase tracking-wide">
               Loan Amount
             </Text>
             <NumberRoulette
@@ -90,7 +53,7 @@ export default function InterestScreen() {
               min={0}
               max={1000000}
               step={5000}
-              error={getPrincipalError}
+              error={getFieldError("principal")}
             />
           </View>
 
@@ -101,7 +64,7 @@ export default function InterestScreen() {
           >
             <Settings2 size={20} color="#3b82f6" style={{ marginRight: 8 }} />
             <Text className="text-blue-700 font-semibold">
-              {showConditions ? 'Hide Conditions' : 'Show Conditions'}
+              {showConditions ? "Hide Conditions" : "Show Conditions"}
             </Text>
           </Pressable>
 
@@ -109,22 +72,22 @@ export default function InterestScreen() {
             <View>
               {/* Annual Rate */}
               <InputField
-                label='Annual Rate'
+                label="Annual Rate"
                 value={data.rate}
-                onChangeText={(v) => updateField('rate', v)}
-                placeholder='0.00%'
-                keyboardType='decimal-pad'
-                error={getRateError}
+                onChangeText={(v) => updateField("rate", v)}
+                placeholder="0.00%"
+                keyboardType="decimal-pad"
+                error={getFieldError("rate")}
               />
 
               {/* Years */}
               <InputField
-                label='Years'
+                label="Years"
                 value={data.years}
-                onChangeText={(v) => updateField('years', v)}
-                placeholder='0'
-                keyboardType='numeric'
-                error={getYearsError}
+                onChangeText={(v) => updateField("years", v)}
+                placeholder="0"
+                keyboardType="numeric"
+                error={getFieldError("years")}
               />
             </View>
           )}
@@ -137,11 +100,8 @@ export default function InterestScreen() {
         </View>
 
         {/* Result Card */}
-        <ResultCard
-          result={result}
-          principal={principal}
-        />
+        <ResultCard result={result} principal={principal} />
       </ScrollView>
-    </View>
-  )
+    </SafeAreaView>
+  );
 }

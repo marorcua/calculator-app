@@ -1,4 +1,4 @@
 /** @format */
 
-export const Drawer = () => null
-export default { Drawer }
+export const Drawer = () => null;
+export default { Drawer };

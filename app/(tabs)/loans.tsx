@@ -1,29 +1,34 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, Pressable } from 'react-native';
-import { usePersistence } from '@/src/infrastructure/persistence/usePersistence';
-import { calculateMonthlyPayment, formatCurrency } from '@/src/domain/math/math';
-import { Landmark, Settings2 } from 'lucide-react-native';
-import { NumberRoulette } from '@/components/NumberRoulette';
-import { InputField } from '@/components/InputField';
+/** @format */
+
+import { calculateMonthlyPayment, formatCurrency } from "@/domain/math/math";
+import { usePersistence } from "@/infrastructure/persistence/usePersistence";
+import { InputField } from "@/ui/components/InputField";
+import { NumberRoulette } from "@/ui/components/NumberRoulette";
+import { Landmark, Settings2 } from "lucide-react-native";
+import React, { useCallback, useState } from "react";
+import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 
 export default function LoansScreen() {
-  const [data, setData, isLoaded] = usePersistence('loan_data', {
-    amount: '10000',
-    rate: '5',
-    years: '10',
+  const [data, setData, isLoaded] = usePersistence("loan_data", {
+    amount: "10000",
+    rate: "5",
+    years: "10",
   });
   const [showConditions, setShowConditions] = useState(false);
 
   // Define callback hooks before any early returns
-  const updateField = useCallback((field: string, value: string) => {
-    setData({ ...data, [field]: value });
-  }, [data, setData]);
+  const updateField = useCallback(
+    (field: string, value: string) => {
+      setData({ ...data, [field]: value });
+    },
+    [data, setData],
+  );
 
   const handleAmountChange = useCallback(
     (val: number) => {
-      updateField('amount', String(val));
+      updateField("amount", String(val));
     },
-    [updateField]
+    [updateField],
   );
 
   // Early return after all hooks are defined
@@ -45,11 +50,16 @@ export default function LoansScreen() {
             <View className="bg-emerald-100 p-3 rounded-2xl mr-4">
               <Landmark size={24} color="#10b981" />
             </View>
-            <Text className="text-2xl font-bold text-gray-800">Loan Calculator</Text>
+
+            <Text className="text-2xl font-bold text-gray-800">
+              Loan Calculator
+            </Text>
           </View>
 
           <View className="mb-6">
-            <Text className="text-sm font-medium text-gray-500 mb-2 ml-1">Loan Amount</Text>
+            <Text className="text-sm font-medium text-gray-500 mb-2 ml-1">
+              Loan Amount
+            </Text>
             <NumberRoulette
               value={amount}
               onChange={handleAmountChange}
@@ -65,7 +75,7 @@ export default function LoansScreen() {
           >
             <Settings2 size={20} color="#10b981" style={{ marginRight: 8 }} />
             <Text className="text-emerald-700 font-semibold">
-              {showConditions ? 'Hide Conditions' : 'Show Conditions'}
+              {showConditions ? "Hide Conditions" : "Show Conditions"}
             </Text>
           </Pressable>
 
@@ -74,13 +84,13 @@ export default function LoansScreen() {
               <InputField
                 label="Annual Rate (%)"
                 value={data.rate}
-                onChangeText={(v) => updateField('rate', v)}
+                onChangeText={(v) => updateField("rate", v)}
                 keyboardType="numeric"
               />
               <InputField
                 label="Loan Term (Years)"
                 value={data.years}
-                onChangeText={(v) => updateField('years', v)}
+                onChangeText={(v) => updateField("years", v)}
                 keyboardType="numeric"
               />
             </View>
@@ -88,18 +98,30 @@ export default function LoansScreen() {
         </View>
 
         <View className="bg-emerald-600 p-8 rounded-3xl shadow-md items-center mb-4">
-          <Text className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-2">Monthly Payment</Text>
-          <Text className="text-white text-4xl font-extrabold">{formatCurrency(monthlyPayment)}</Text>
+          <Text className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-2">
+            Monthly Payment
+          </Text>
+          <Text className="text-white text-4xl font-extrabold">
+            {formatCurrency(monthlyPayment)}
+          </Text>
         </View>
 
         <View className="flex-row space-x-4">
           <View className="flex-1 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 items-center">
-            <Text className="text-gray-500 text-xs font-bold uppercase mb-1">Total Interest</Text>
-            <Text className="text-gray-800 text-xl font-bold">{formatCurrency(totalInterest > 0 ? totalInterest : 0)}</Text>
+            <Text className="text-gray-500 text-xs font-bold uppercase mb-1">
+              Total Interest
+            </Text>
+            <Text className="text-gray-800 text-xl font-bold">
+              {formatCurrency(totalInterest > 0 ? totalInterest : 0)}
+            </Text>
           </View>
           <View className="flex-1 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 items-center">
-            <Text className="text-gray-500 text-xs font-bold uppercase mb-1">Total Payment</Text>
-            <Text className="text-gray-800 text-xl font-bold">{formatCurrency(totalPayment > 0 ? totalPayment : 0)}</Text>
+            <Text className="text-gray-500 text-xs font-bold uppercase mb-1">
+              Total Payment
+            </Text>
+            <Text className="text-gray-800 text-xl font-bold">
+              {formatCurrency(totalPayment > 0 ? totalPayment : 0)}
+            </Text>
           </View>
         </View>
       </ScrollView>

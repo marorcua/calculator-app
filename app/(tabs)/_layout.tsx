@@ -1,9 +1,9 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { PiggyBank, Landmark } from 'lucide-react-native';
+import { Tabs } from "expo-router";
+import React from "react";
+import { PiggyBank, Landmark } from "lucide-react-native";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/src/ui/hooks/useColorScheme';
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/src/ui/hooks/useColorScheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -11,20 +11,21 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: true,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Investment',
+          title: "Investment",
           tabBarIcon: ({ color }) => <PiggyBank size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="loans"
         options={{
-          title: 'Loans',
+          title: "Loans",
           tabBarIcon: ({ color }) => <Landmark size={24} color={color} />,
         }}
       />
