@@ -9,15 +9,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedScrollHandler,
+  interpolate,
+  Extrapolation,
+  runOnJS,
+} from "react-native-reanimated";
 
 interface NumberRouletteProps {
   value: number;
@@ -34,6 +34,51 @@ const VISIBLE_ITEMS = 5; // must be odd
 const SIDE_ITEMS = Math.floor(VISIBLE_ITEMS / 2);
 const CONTAINER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 
+// Animated Item Component for fluid transitions
+const RouletteItem = ({
+  item,
+  index,
+  scrollY,
+  format,
+}: {
+  item: number;
+  index: number;
+  scrollY: Animated.SharedValue<number>;
+  format: (v: number) => string;
+}) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const itemPosition = index * ITEM_HEIGHT;
+    const distance = Math.abs(scrollY.value - itemPosition);
+
+    // Fluid scale: 1.0 (far) to 1.5 (center)
+    const scale = interpolate(
+      distance,
+      [0, ITEM_HEIGHT, ITEM_HEIGHT * 2],
+      [1.5, 1.0, 0.8],
+      Extrapolation.CLAMP,
+    );
+
+    // Fluid opacity: 1.0 (center) to 0.3 (far)
+    const opacity = interpolate(
+      distance,
+      [0, ITEM_HEIGHT, ITEM_HEIGHT * 2],
+      [1, 0.6, 0.3],
+      Extrapolation.CLAMP,
+    );
+
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
+  });
+
+  return (
+    <Animated.View style={[styles.item, animatedStyle]}>
+      <Text style={styles.itemTextBase}>{format(item)}</Text>
+    </Animated.View>
+  );
+};
+
 export const NumberRoulette = ({
   value,
   onChange,
@@ -43,7 +88,8 @@ export const NumberRoulette = ({
   format = (v) => formatCurrency(v),
   error,
 }: NumberRouletteProps) => {
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<Animated.ScrollView>(null);
+  const scrollY = useSharedValue(0);
 
   const items = useMemo(() => {
     const result: number[] = [];
@@ -64,24 +110,25 @@ export const NumberRoulette = ({
     return Math.max(0, Math.min(Math.floor((max - min) / step), raw));
   });
 
-  // Ref for immediate access without stale closures
   const indexRef = useRef(centeredIndex);
-  const itemsRef = useRef(items);
   const lastEmittedValue = useRef<number>(value);
-
-  useEffect(() => {
-    itemsRef.current = items;
-  }, [items]);
+  const debouncedEmit = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     indexRef.current = centeredIndex;
   }, [centeredIndex]);
 
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debouncedEmit.current) clearTimeout(debouncedEmit.current);
+    };
+  }, []);
+
   // Sync scroll position when external value changes
   useEffect(() => {
     const idx = indexForValue(value);
 
-    // Guard: Don't interrupt if we are already at this index or if we just sent this value
     if (idx === indexRef.current || value === lastEmittedValue.current) {
       return;
     }
@@ -92,48 +139,70 @@ export const NumberRoulette = ({
 
     const timer = setTimeout(() => {
       scrollRef.current?.scrollTo({ y: idx * ITEM_HEIGHT, animated: false });
+      scrollY.value = idx * ITEM_HEIGHT;
     }, 50);
     return () => clearTimeout(timer);
-  }, [value, indexForValue]);
+  }, [value, indexForValue, scrollY]);
 
   const scrollToIndex = useCallback((index: number, animated = true) => {
     scrollRef.current?.scrollTo({ y: index * ITEM_HEIGHT, animated });
   }, []);
 
-  const handleScroll = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const offsetY = e.nativeEvent.contentOffset.y;
-      const idx = Math.max(
-        0,
-        Math.min(items.length - 1, Math.round(offsetY / ITEM_HEIGHT)),
-      );
-      if (idx !== indexRef.current) {
-        setCenteredIndex(idx);
-        indexRef.current = idx;
-        onChange(items[idx]);
-      }
-    },
-    [items],
-  );
-
-  const handleScrollEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const offsetY = e.nativeEvent.contentOffset.y;
-      const idx = Math.max(
-        0,
-        Math.min(items.length - 1, Math.round(offsetY / ITEM_HEIGHT)),
-      );
-
-      setCenteredIndex(idx);
-      indexRef.current = idx;
-
-      if (items[idx] !== lastEmittedValue.current) {
-        lastEmittedValue.current = items[idx];
-        onChange(items[idx]);
+  const emitChange = useCallback(
+    (index: number) => {
+      const val = items[index];
+      if (val !== undefined && val !== lastEmittedValue.current) {
+        lastEmittedValue.current = val;
+        onChange(val);
       }
     },
     [items, onChange],
   );
+
+  const debouncedUpdate = useCallback(
+    (offsetY: number) => {
+      if (debouncedEmit.current) clearTimeout(debouncedEmit.current);
+      debouncedEmit.current = setTimeout(() => {
+        const idx = Math.max(
+          0,
+          Math.min(items.length - 1, Math.round(offsetY / ITEM_HEIGHT)),
+        );
+        setCenteredIndex(idx);
+        indexRef.current = idx;
+        emitChange(idx);
+      }, 150);
+    },
+    [items, emitChange],
+  );
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+      runOnJS(debouncedUpdate)(event.contentOffset.y);
+    },
+    onMomentumEnd: (event) => {
+      const idx = Math.max(
+        0,
+        Math.min(
+          items.length - 1,
+          Math.round(event.contentOffset.y / ITEM_HEIGHT),
+        ),
+      );
+      runOnJS(setCenteredIndex)(idx);
+      runOnJS(emitChange)(idx);
+    },
+    onEndDrag: (event) => {
+      const idx = Math.max(
+        0,
+        Math.min(
+          items.length - 1,
+          Math.round(event.contentOffset.y / ITEM_HEIGHT),
+        ),
+      );
+      runOnJS(setCenteredIndex)(idx);
+      runOnJS(emitChange)(idx);
+    },
+  });
 
   const handleIncrement = useCallback(() => {
     const next = Math.min(items.length - 1, indexRef.current + 1);
@@ -165,7 +234,6 @@ export const NumberRoulette = ({
           error ? styles.containerError : styles.containerNormal,
         ]}
       >
-        {/* Up / decrement button */}
         <Pressable
           onPress={handleDecrement}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
@@ -174,12 +242,10 @@ export const NumberRoulette = ({
           <ChevronUp size={22} color="#6b7280" />
         </Pressable>
 
-        {/* Picker window */}
         <View style={styles.window}>
-          {/* Center highlight bar */}
           <View style={styles.selectionBar} pointerEvents="none" />
 
-          <ScrollView
+          <Animated.ScrollView
             ref={scrollRef}
             style={styles.scroll}
             contentContainerStyle={{
@@ -190,35 +256,23 @@ export const NumberRoulette = ({
             snapToAlignment="center"
             decelerationRate="fast"
             scrollEventThrottle={16}
-            onScroll={handleScroll}
-            onScrollEndDrag={handleScrollEnd}
-            onMomentumScrollEnd={handleScrollEnd}
+            onScroll={onScroll}
             bounces={false}
             overScrollMode="never"
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
           >
-            {items.map((item, index) => {
-              const distance = Math.abs(index - centeredIndex);
-              return (
-                <View key={item} style={styles.item}>
-                  <Text
-                    style={[
-                      styles.itemText,
-                      distance === 0 && styles.itemTextActive,
-                      distance === 1 && styles.itemTextNear,
-                      distance >= 2 && styles.itemTextFar,
-                    ]}
-                  >
-                    {format(item)}
-                  </Text>
-                </View>
-              );
-            })}
-          </ScrollView>
+            {items.map((item, index) => (
+              <RouletteItem
+                key={item}
+                item={item}
+                index={index}
+                scrollY={scrollY}
+                format={format}
+              />
+            ))}
+          </Animated.ScrollView>
         </View>
 
-        {/* Down / increment button */}
         <Pressable
           onPress={handleIncrement}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
@@ -284,25 +338,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  itemText: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: "#d1d5db",
-  },
-  itemTextActive: {
-    fontSize: 26,
+  itemTextBase: {
+    fontSize: 18,
     fontWeight: "600",
     color: "#111827",
-  },
-  itemTextNear: {
-    fontSize: 20,
-    fontWeight: "400",
-    color: "#6b7280",
-  },
-  itemTextFar: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: "#d1d5db",
   },
   error: {
     fontSize: 12,
