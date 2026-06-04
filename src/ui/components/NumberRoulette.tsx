@@ -1,5 +1,3 @@
-/** @format */
-
 import { formatCurrency } from "@/domain/math/math";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, {
@@ -30,11 +28,10 @@ interface NumberRouletteProps {
 }
 
 const ITEM_HEIGHT = 52;
-const VISIBLE_ITEMS = 5; // must be odd
+const VISIBLE_ITEMS = 5;
 const SIDE_ITEMS = Math.floor(VISIBLE_ITEMS / 2);
 const CONTAINER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 
-// Animated Item Component for fluid transitions
 const RouletteItem = ({
   item,
   index,
@@ -50,7 +47,6 @@ const RouletteItem = ({
     const itemPosition = index * ITEM_HEIGHT;
     const distance = Math.abs(scrollY.value - itemPosition);
 
-    // Fluid scale: 1.0 (far) to 1.5 (center)
     const scale = interpolate(
       distance,
       [0, ITEM_HEIGHT, ITEM_HEIGHT * 2],
@@ -58,7 +54,6 @@ const RouletteItem = ({
       Extrapolation.CLAMP,
     );
 
-    // Fluid opacity: 1.0 (center) to 0.3 (far)
     const opacity = interpolate(
       distance,
       [0, ITEM_HEIGHT, ITEM_HEIGHT * 2],
@@ -118,14 +113,12 @@ export const NumberRoulette = ({
     indexRef.current = centeredIndex;
   }, [centeredIndex]);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (debouncedEmit.current) clearTimeout(debouncedEmit.current);
     };
   }, []);
 
-  // Sync scroll position when external value changes
   useEffect(() => {
     const idx = indexForValue(value);
 

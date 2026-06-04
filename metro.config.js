@@ -1,4 +1,3 @@
-/** @format */
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
@@ -11,7 +10,6 @@ config.resolver.sourceExts = [...sourceExts, "svg"];
 
 config.resolver.unstable_enablePackageExports = true;
 
-// Stub vaul for native platforms
 config.resolver.extraNodeModules = {
   ...config.resolver.extraNodeModules,
   vaul: path.resolve(__dirname, "shims/vaul.js"),

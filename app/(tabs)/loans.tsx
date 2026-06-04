@@ -1,5 +1,3 @@
-/** @format */
-
 import { calculateMonthlyPayment, formatCurrency } from "@/domain/math/math";
 import { usePersistence } from "@/infrastructure/persistence/usePersistence";
 import { InputField } from "@/ui/components/InputField";
@@ -18,7 +16,6 @@ export default function LoansScreen() {
   });
   const [showConditions, setShowConditions] = useState(false);
 
-  // Define callback hooks before any early returns
   const updateField = useCallback(
     (field: string, value: string) => {
       setData({ ...data, [field]: value });
@@ -33,7 +30,6 @@ export default function LoansScreen() {
     [updateField],
   );
 
-  // Early return after all hooks are defined
   if (!isLoaded) return null;
 
   const amount = parseFloat(data.amount) || 0;

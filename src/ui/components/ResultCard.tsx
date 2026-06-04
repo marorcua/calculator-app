@@ -38,7 +38,6 @@ export const ResultCard = ({ result, principal }: ResultCardProps) => {
         </View>
       )}
 
-      {/* Yearly Breakdown */}
       <Pressable
         onPress={() => setShowBreakdown(!showBreakdown)}
         className="mt-6 w-full flex-row items-center justify-between bg-blue-500 bg-opacity-40 px-4 py-3 rounded-lg border border-blue-400"

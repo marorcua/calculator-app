@@ -1,10 +1,3 @@
-/**
- * Learn more about Light and Dark modes:
- * https://docs.expo.io/guides/color-schemes/
- *
- * @format
- */
-
 import { Text as DefaultText, View as DefaultView } from "react-native";
 
 import { useColorScheme } from "@/src/ui/hooks/useColorScheme";

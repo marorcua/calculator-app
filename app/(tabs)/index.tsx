@@ -1,4 +1,3 @@
-/** @format */
 import { FrequencySelector } from "@/ui/components/FrequencySelector";
 import { InputField } from "@/ui/components/InputField";
 import { NumberRoulette } from "@/ui/components/NumberRoulette";
@@ -38,7 +37,6 @@ export default function InterestScreen() {
         contentContainerStyle={{ padding: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View className="flex-row items-center mb-8">
           <View className="bg-blue-600 p-4 rounded-2xl mr-4">
             <PiggyBank size={28} color="white" />
@@ -51,7 +49,6 @@ export default function InterestScreen() {
           </View>
         </View>
 
-        {/* Input Card */}
         <View className="bg-white p-8 rounded-3xl shadow-sm mb-6 border border-gray-100">
           <View className="mb-8">
             <Text className="text-sm font-bold text-gray-600 mb-4 ml-1 uppercase tracking-wide">
@@ -67,7 +64,6 @@ export default function InterestScreen() {
             />
           </View>
 
-          {/* Toggle Conditions */}
           <Pressable
             onPress={() => setShowConditions(!showConditions)}
             className="flex-row items-center mb-6 p-3 rounded-xl bg-blue-50 border border-blue-100"
@@ -80,7 +76,6 @@ export default function InterestScreen() {
 
           {showConditions && (
             <View>
-              {/* Annual Rate */}
               <InputField
                 label="Annual Rate"
                 value={data.rate}
@@ -90,7 +85,6 @@ export default function InterestScreen() {
                 error={getFieldError("rate")}
               />
 
-              {/* Years */}
               <InputField
                 label="Years"
                 value={data.years}
@@ -102,14 +96,12 @@ export default function InterestScreen() {
             </View>
           )}
 
-          {/* Compounding Frequency */}
           <FrequencySelector
             value={data.frequency}
             onChange={handleFrequencyChange}
           />
         </View>
 
-        {/* Result Card */}
         <ResultCard result={result} principal={principal} />
       </ScrollView>
     </View>

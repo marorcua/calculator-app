@@ -1,11 +1,3 @@
-/**
- * Calculates the future value with compound interest.
- * A = P(1 + r/n)^(nt)
- * @param principal - Initial amount (P)
- * @param annualRate - Annual interest rate as decimal (r) (e.g., 0.05 for 5%)
- * @param timesCompounded - Compounding frequency per year (n)
- * @param years - Time in years (t)
- */
 export const calculateCompoundInterest = (
   principal: number,
   annualRate: number,
@@ -20,9 +12,6 @@ export const calculateCompoundInterest = (
   );
 };
 
-/**
- * Generates year-by-year breakdown of compound interest
- */
 export const generateYearlyBreakdown = (
   principal: number,
   annualRate: number,
@@ -48,13 +37,6 @@ export const generateYearlyBreakdown = (
   return breakdown;
 };
 
-/**
- * Calculates the monthly loan payment.
- * M = P [ r(1+r)^n ] / [ (1+r)^n – 1 ]
- * @param principal - Loan amount (P)
- * @param annualRate - Annual interest rate as decimal (e.g., 0.05 for 5%)
- * @param loanTermYears - Length of loan in years
- */
 export const calculateMonthlyPayment = (
   principal: number,
   annualRate: number,
@@ -81,9 +63,6 @@ export const calculateMonthlyPayment = (
   return payment;
 };
 
-/**
- * Formats a number as currency.
- */
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
