@@ -11,6 +11,7 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 }));
 
 jest.mock("react-native-css-interop", () => ({
-  cssInterop: (component) => component,
+  cssInterop: (c) => c,
+  useColorScheme: jest.fn(() => "light"),
   getColorScheme: jest.fn(() => "light"),
 }));

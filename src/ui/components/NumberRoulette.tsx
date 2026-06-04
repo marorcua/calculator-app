@@ -15,6 +15,7 @@ import Animated, {
   interpolate,
   Extrapolation,
   runOnJS,
+  SharedValue,
 } from "react-native-reanimated";
 
 interface NumberRouletteProps {
@@ -40,7 +41,7 @@ const RouletteItem = ({
 }: {
   item: number;
   index: number;
-  scrollY: Animated.SharedValue<number>;
+  scrollY: SharedValue<number>;
   format: (v: number) => string;
 }) => {
   const animatedStyle = useAnimatedStyle(() => {
@@ -107,7 +108,7 @@ export const NumberRoulette = ({
 
   const indexRef = useRef(centeredIndex);
   const lastEmittedValue = useRef<number>(value);
-  const debouncedEmit = useRef<NodeJS.Timeout | null>(null);
+  const debouncedEmit = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     indexRef.current = centeredIndex;

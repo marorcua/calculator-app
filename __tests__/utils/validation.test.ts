@@ -12,6 +12,8 @@ describe("Validation Utilities", () => {
       rate: "5",
       years: "10",
       frequency: "monthly",
+      withdrawalRate: "3.8",
+      taxRate: "20",
     };
 
     it("should accept valid data", () => {
@@ -73,6 +75,8 @@ describe("Validation Utilities", () => {
         rate: "",
         years: "",
         frequency: "monthly",
+        withdrawalRate: "",
+        taxRate: "",
       };
       const errors = validateCalculatorData(data);
       expect(errors).toHaveLength(0);

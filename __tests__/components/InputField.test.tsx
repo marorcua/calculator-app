@@ -1,5 +1,12 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
+
+jest.mock("react-native-css-interop", () => ({
+  cssInterop: (component: any) => component,
+  useColorScheme: jest.fn(() => "light"),
+  getColorScheme: jest.fn(() => "light"),
+}));
+
 import { InputField } from "@/ui/components/InputField";
 
 describe("InputField", () => {
