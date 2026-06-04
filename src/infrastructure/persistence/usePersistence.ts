@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Repository } from "@/domain/repositories/Repository";
 import { AsyncStorageRepository } from "@/infrastructure/persistence/AsyncStorageRepository";
 
-export function usePersistence<T>(key: string, initialValue: T) {
+export function usePersistence<T extends object>(key: string, initialValue: T) {
   const repository = useMemo(() => new AsyncStorageRepository<T>(key), [key]);
   const [state, setState] = useState<T>(initialValue);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -12,7 +12,7 @@ export function usePersistence<T>(key: string, initialValue: T) {
       try {
         const savedValue = await repository.load();
         if (savedValue !== null) {
-          setState(savedValue);
+          setState({ ...initialValue, ...savedValue });
         }
       } catch (error) {
         console.error(`Error loading persistence key "${key}":`, error);
