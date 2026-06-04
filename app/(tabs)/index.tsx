@@ -93,13 +93,13 @@ export default function InterestScreen() {
                 keyboardType="numeric"
                 error={getFieldError("years")}
               />
+
+              <FrequencySelector
+                value={data.frequency}
+                onChange={handleFrequencyChange}
+              />
             </View>
           )}
-
-          <FrequencySelector
-            value={data.frequency}
-            onChange={handleFrequencyChange}
-          />
         </View>
 
         <ResultCard result={result} principal={principal} />
