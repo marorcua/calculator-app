@@ -19,6 +19,12 @@ export const useCompoundInterestCalculator = (
     const years = parseFloat(data.years) || 0;
     const frequency = COMPOUNDING_FREQUENCY_MAP[data.frequency];
 
+    const withdrawalRate =
+      (parseFloat(data.withdrawalRate) || FIRE_SETTINGS.withdrawalRate * 100) /
+      100;
+    const taxRate =
+      (parseFloat(data.taxRate) || FIRE_SETTINGS.taxRate * 100) / 100;
+
     const futureValue = calculateCompoundInterest(
       principal,
       rate,
@@ -35,8 +41,7 @@ export const useCompoundInterestCalculator = (
       years,
     );
 
-    const fireIncome =
-      futureValue * FIRE_SETTINGS.withdrawalRate * (1 - FIRE_SETTINGS.taxRate);
+    const fireIncome = futureValue * withdrawalRate * (1 - taxRate);
     const monthlyFireIncome = fireIncome / 12;
 
     return {
@@ -47,5 +52,12 @@ export const useCompoundInterestCalculator = (
       fireIncome,
       monthlyFireIncome,
     };
-  }, [data.principal, data.rate, data.years, data.frequency]);
+  }, [
+    data.principal,
+    data.rate,
+    data.years,
+    data.frequency,
+    data.withdrawalRate,
+    data.taxRate,
+  ]);
 };

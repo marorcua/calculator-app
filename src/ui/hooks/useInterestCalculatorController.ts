@@ -5,6 +5,7 @@ import { validateCalculatorData } from "@/domain/validation/validation";
 import {
   CalculatorData,
   CompoundingFrequency,
+  FIRE_SETTINGS,
 } from "@/domain/models/calculator";
 
 export const useInterestCalculatorController = () => {
@@ -15,6 +16,8 @@ export const useInterestCalculatorController = () => {
       rate: "5",
       years: "10",
       frequency: "monthly",
+      withdrawalRate: (FIRE_SETTINGS.withdrawalRate * 100).toString(),
+      taxRate: (FIRE_SETTINGS.taxRate * 100).toString(),
     },
   );
   const [showConditions, setShowConditions] = useState(false);

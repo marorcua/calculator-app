@@ -5,6 +5,8 @@ export interface CalculatorData {
   rate: string;
   years: string;
   frequency: CompoundingFrequency;
+  withdrawalRate: string;
+  taxRate: string;
 }
 
 export interface ValidationError {
@@ -29,7 +31,7 @@ export interface YearlyData {
 
 export const FIRE_SETTINGS = {
   withdrawalRate: 0.038,
-  taxRate: 0.2, // 1 - 0.8 = 0.2
+  taxRate: 0.2,
 };
 
 export const COMPOUNDING_FREQUENCY_MAP: Record<CompoundingFrequency, number> = {

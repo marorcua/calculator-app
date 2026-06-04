@@ -94,6 +94,22 @@ export default function InterestScreen() {
                 error={getFieldError("years")}
               />
 
+              <InputField
+                label="Withdrawal Rate (%)"
+                value={data.withdrawalRate}
+                onChangeText={(v) => updateField("withdrawalRate", v)}
+                placeholder="3.8"
+                keyboardType="decimal-pad"
+              />
+
+              <InputField
+                label="Tax Rate (%)"
+                value={data.taxRate}
+                onChangeText={(v) => updateField("taxRate", v)}
+                placeholder="20.0"
+                keyboardType="decimal-pad"
+              />
+
               <FrequencySelector
                 value={data.frequency}
                 onChange={handleFrequencyChange}
