@@ -17,4 +17,4 @@ config.resolver.extraNodeModules = {
   vaul: path.resolve(__dirname, "shims/vaul.js"),
 };
 
-module.exports = withNativeWind(config, { input: "./src/ui/global.css" });
+module.exports = withNativeWind(config, { input: "./global.css" });

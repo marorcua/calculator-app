@@ -1,4 +1,8 @@
-import "@testing-library/jest-native/extend-expect";
+console.log("Jest setup loaded");
+global.__DEV__ = true;
+
+// Mock react-native
+jest.mock("react-native", () => require("react-native/jest/mock"));
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -6,4 +10,10 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(() => Promise.resolve(null)),
   removeItem: jest.fn(() => Promise.resolve()),
   clear: jest.fn(() => Promise.resolve()),
+}));
+
+// Mock react-native-css-interop
+jest.mock("react-native-css-interop", () => ({
+  cssInterop: (component) => component,
+  getColorScheme: jest.fn(() => "light"),
 }));

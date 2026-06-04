@@ -6,9 +6,11 @@ import { InputField } from "@/ui/components/InputField";
 import { NumberRoulette } from "@/ui/components/NumberRoulette";
 import { Landmark, Settings2 } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LoansScreen() {
+  const insets = useSafeAreaInsets();
   const [data, setData, isLoaded] = usePersistence("loan_data", {
     amount: "10000",
     rate: "5",
@@ -43,8 +45,15 @@ export default function LoansScreen() {
   const totalInterest = totalPayment - amount;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="p-4">
+    <View
+      className="flex-1 bg-gray-50"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ padding: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View className="bg-white p-6 rounded-3xl shadow-sm mb-6 border border-gray-100">
           <View className="flex-row items-center mb-6">
             <View className="bg-emerald-100 p-3 rounded-2xl mr-4">
@@ -125,6 +134,6 @@ export default function LoansScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

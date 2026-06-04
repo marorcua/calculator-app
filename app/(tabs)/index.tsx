@@ -7,9 +7,11 @@ import { useInterestCalculatorController } from "@/ui/hooks/useInterestCalculato
 
 import { PiggyBank, Settings2 } from "lucide-react-native";
 import React from "react";
-import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function InterestScreen() {
+  const insets = useSafeAreaInsets();
   const {
     data,
     isLoaded,
@@ -26,8 +28,16 @@ export default function InterestScreen() {
   if (!isLoaded) return null;
 
   return (
-    <SafeAreaView className="flex-1 bg-blue-50">
-      <ScrollView className="p-6" showsVerticalScrollIndicator={false}>
+    <View
+      className="flex-1 bg-blue-50"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
+      <ScrollView
+        className="flex-1"
+        scrollEnabled={true}
+        contentContainerStyle={{ padding: 24 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View className="flex-row items-center mb-8">
           <View className="bg-blue-600 p-4 rounded-2xl mr-4">
@@ -102,6 +112,6 @@ export default function InterestScreen() {
         {/* Result Card */}
         <ResultCard result={result} principal={principal} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

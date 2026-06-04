@@ -1,5 +1,6 @@
 /** @format */
 
+import { formatCurrency } from "@/domain/math/math";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, {
   useCallback,
@@ -17,7 +18,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { formatCurrency } from "@/domain/math/math";
 
 interface NumberRouletteProps {
   value: number;
@@ -64,14 +64,18 @@ export const NumberRoulette = ({
     return Math.max(0, Math.min(Math.floor((max - min) / step), raw));
   });
 
-  // Use a ref for immediate access to current index
+  // Ref for immediate access without stale closures
   const indexRef = useRef(centeredIndex);
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   useEffect(() => {
     indexRef.current = centeredIndex;
   }, [centeredIndex]);
 
-  // Scroll to initial value once the layout is ready
+  // Scroll to initial value once layout is ready
   useEffect(() => {
     const idx = indexForValue(value);
     setCenteredIndex(idx);
@@ -80,7 +84,7 @@ export const NumberRoulette = ({
       scrollRef.current?.scrollTo({ y: idx * ITEM_HEIGHT, animated: false });
     }, 50);
     return () => clearTimeout(timer);
-  }, [value]); // Added value as dependency
+  }, [value]);
 
   const scrollToIndex = useCallback((index: number, animated = true) => {
     scrollRef.current?.scrollTo({ y: index * ITEM_HEIGHT, animated });
@@ -98,15 +102,12 @@ export const NumberRoulette = ({
       if (idx !== indexRef.current) {
         setCenteredIndex(idx);
         indexRef.current = idx;
-
-        // Update value during scroll if it changed
         if (items[idx] !== lastEmittedValue.current) {
           lastEmittedValue.current = items[idx];
-          onChange(items[idx]);
         }
       }
     },
-    [items, onChange],
+    [items],
   );
 
   const handleScrollEnd = useCallback(
@@ -120,8 +121,6 @@ export const NumberRoulette = ({
         setCenteredIndex(idx);
         indexRef.current = idx;
       }
-
-      // Ensure we final-sync
       if (items[idx] !== lastEmittedValue.current) {
         lastEmittedValue.current = items[idx];
         onChange(items[idx]);
