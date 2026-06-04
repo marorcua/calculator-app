@@ -67,6 +67,8 @@ export const NumberRoulette = ({
   // Ref for immediate access without stale closures
   const indexRef = useRef(centeredIndex);
   const itemsRef = useRef(items);
+  const lastEmittedValue = useRef<number>(value);
+
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
@@ -75,22 +77,28 @@ export const NumberRoulette = ({
     indexRef.current = centeredIndex;
   }, [centeredIndex]);
 
-  // Scroll to initial value once layout is ready
+  // Sync scroll position when external value changes
   useEffect(() => {
     const idx = indexForValue(value);
+
+    // Guard: Don't interrupt if we are already at this index or if we just sent this value
+    if (idx === indexRef.current || value === lastEmittedValue.current) {
+      return;
+    }
+
     setCenteredIndex(idx);
     indexRef.current = idx;
+    lastEmittedValue.current = value;
+
     const timer = setTimeout(() => {
       scrollRef.current?.scrollTo({ y: idx * ITEM_HEIGHT, animated: false });
     }, 50);
     return () => clearTimeout(timer);
-  }, [value]);
+  }, [value, indexForValue]);
 
   const scrollToIndex = useCallback((index: number, animated = true) => {
     scrollRef.current?.scrollTo({ y: index * ITEM_HEIGHT, animated });
   }, []);
-
-  const lastEmittedValue = useRef<number>(value);
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -102,9 +110,7 @@ export const NumberRoulette = ({
       if (idx !== indexRef.current) {
         setCenteredIndex(idx);
         indexRef.current = idx;
-        if (items[idx] !== lastEmittedValue.current) {
-          lastEmittedValue.current = items[idx];
-        }
+        onChange(items[idx]);
       }
     },
     [items],
@@ -117,10 +123,10 @@ export const NumberRoulette = ({
         0,
         Math.min(items.length - 1, Math.round(offsetY / ITEM_HEIGHT)),
       );
-      if (idx !== indexRef.current) {
-        setCenteredIndex(idx);
-        indexRef.current = idx;
-      }
+
+      setCenteredIndex(idx);
+      indexRef.current = idx;
+
       if (items[idx] !== lastEmittedValue.current) {
         lastEmittedValue.current = items[idx];
         onChange(items[idx]);
@@ -131,18 +137,24 @@ export const NumberRoulette = ({
 
   const handleIncrement = useCallback(() => {
     const next = Math.min(items.length - 1, indexRef.current + 1);
-    scrollToIndex(next);
-    setCenteredIndex(next);
-    indexRef.current = next;
-    onChange(items[next]);
+    if (next !== indexRef.current) {
+      lastEmittedValue.current = items[next];
+      setCenteredIndex(next);
+      indexRef.current = next;
+      scrollToIndex(next);
+      onChange(items[next]);
+    }
   }, [items, scrollToIndex, onChange]);
 
   const handleDecrement = useCallback(() => {
     const prev = Math.max(0, indexRef.current - 1);
-    scrollToIndex(prev);
-    setCenteredIndex(prev);
-    indexRef.current = prev;
-    onChange(items[prev]);
+    if (prev !== indexRef.current) {
+      lastEmittedValue.current = items[prev];
+      setCenteredIndex(prev);
+      indexRef.current = prev;
+      scrollToIndex(prev);
+      onChange(items[prev]);
+    }
   }, [items, scrollToIndex, onChange]);
 
   return (

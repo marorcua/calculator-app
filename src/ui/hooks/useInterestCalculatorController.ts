@@ -25,9 +25,9 @@ export const useInterestCalculatorController = () => {
 
   const updateField = useCallback(
     (field: keyof CalculatorData, value: string) => {
-      setData({ ...data, [field]: value });
+      setData((prev) => ({ ...prev, [field]: value }));
     },
-    [data, setData],
+    [setData],
   );
 
   const handlePrincipalChange = useCallback(
