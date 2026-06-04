@@ -17,6 +17,8 @@ export interface CalculationResult {
   totalInterest: number;
   growthPercentage: number;
   yearlyBreakdown: YearlyData[];
+  fireIncome: number;
+  monthlyFireIncome: number;
 }
 
 export interface YearlyData {
@@ -24,6 +26,11 @@ export interface YearlyData {
   value: number;
   interestEarned: number;
 }
+
+export const FIRE_SETTINGS = {
+  withdrawalRate: 0.038,
+  taxRate: 0.2, // 1 - 0.8 = 0.2
+};
 
 export const COMPOUNDING_FREQUENCY_MAP: Record<CompoundingFrequency, number> = {
   daily: 365,

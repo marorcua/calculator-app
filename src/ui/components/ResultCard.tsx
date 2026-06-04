@@ -21,6 +21,25 @@ export const ResultCard = ({ result, principal }: ResultCardProps) => {
         {formatCurrency(result.futureValue)}
       </Text>
 
+      <View className="flex-row w-full justify-between mb-4 gap-2">
+        <View className="flex-1 bg-blue-500 bg-opacity-60 px-4 py-3 rounded-xl border border-blue-400">
+          <Text className="text-blue-200 text-xs font-bold text-center">
+            Annual FIRE
+          </Text>
+          <Text className="text-white font-semibold text-center mt-1">
+            {formatCurrency(result.fireIncome)}
+          </Text>
+        </View>
+        <View className="flex-1 bg-blue-500 bg-opacity-60 px-4 py-3 rounded-xl border border-blue-400">
+          <Text className="text-blue-200 text-xs font-bold text-center">
+            Monthly FIRE
+          </Text>
+          <Text className="text-white font-semibold text-center mt-1">
+            {formatCurrency(result.monthlyFireIncome)}
+          </Text>
+        </View>
+      </View>
+
       <View className="bg-blue-500 bg-opacity-60 px-6 py-3 rounded-full border border-blue-400 w-full">
         <Text className="text-white font-semibold text-center">
           Interest Earned:{" "}

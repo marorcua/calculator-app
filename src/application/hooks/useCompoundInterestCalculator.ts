@@ -3,6 +3,7 @@ import {
   CalculatorData,
   CalculationResult,
   COMPOUNDING_FREQUENCY_MAP,
+  FIRE_SETTINGS,
 } from "@/src/domain/models/calculator";
 import {
   calculateCompoundInterest,
@@ -34,11 +35,17 @@ export const useCompoundInterestCalculator = (
       years,
     );
 
+    const fireIncome =
+      futureValue * FIRE_SETTINGS.withdrawalRate * (1 - FIRE_SETTINGS.taxRate);
+    const monthlyFireIncome = fireIncome / 12;
+
     return {
       futureValue,
       totalInterest,
       growthPercentage,
       yearlyBreakdown,
+      fireIncome,
+      monthlyFireIncome,
     };
   }, [data.principal, data.rate, data.years, data.frequency]);
 };
