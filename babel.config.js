@@ -13,10 +13,15 @@ module.exports = function (api) {
   return {
     presets,
     plugins: [
-      "babel-plugin-transform-import-meta",
       ["@babel/plugin-transform-class-properties", { loose: true }],
       ["@babel/plugin-transform-private-methods", { loose: true }],
       "react-native-reanimated/plugin",
+      [
+        "babel-plugin-transform-define",
+        {
+          "import.meta.env": "process.env",
+        },
+      ],
     ],
   };
 };
