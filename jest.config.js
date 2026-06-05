@@ -9,20 +9,8 @@ module.exports = {
     "^@/infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
     "^@/ui/(.*)$": "<rootDir>/src/ui/$1",
   },
-  transform: {
-    "^.+\\.(js|jsx|ts|tsx)$": [
-      "babel-jest",
-      {
-        presets: [
-          ["@babel/preset-env", { targets: { node: "current" } }],
-          "@babel/preset-typescript",
-          ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-        ],
-      },
-    ],
-  },
   transformIgnorePatterns: [
-    "node_modules/(?!(jest-)?react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@react-navigation|nativewind|lucide-react-native)",
+    "node_modules/(?!(jest-)?react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@react-navigation|lucide-react-native)",
   ],
   testMatch: ["**/__tests__/**/*.test.ts?(x)", "**/?(*.)+(spec|test).ts?(x)"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
