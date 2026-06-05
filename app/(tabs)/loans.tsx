@@ -1,5 +1,5 @@
 import { calculateMonthlyPayment, formatCurrency } from "@/domain/math/math";
-import { usePersistence } from "@/infrastructure/persistence/usePersistence";
+import { useCalculatorStore } from "@/infrastructure/state/useCalculatorStore";
 import { InputField } from "@/ui/components/InputField";
 import { NumberRoulette } from "@/ui/components/NumberRoulette";
 import { Landmark, Settings2 } from "lucide-react-native";
@@ -9,18 +9,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LoansScreen() {
   const insets = useSafeAreaInsets();
-  const [data, setData, isLoaded] = usePersistence("loan_data", {
-    amount: "10000",
-    rate: "5",
-    years: "10",
-  });
+  const { loanData: data, setLoanField, isLoaded } = useCalculatorStore();
   const [showConditions, setShowConditions] = useState(false);
 
   const updateField = useCallback(
-    (field: string, value: string) => {
-      setData({ ...data, [field]: value });
+    (field: "amount" | "rate" | "years", value: string) => {
+      setLoanField(field, value);
     },
-    [data, setData],
+    [setLoanField],
   );
 
   const handleAmountChange = useCallback(

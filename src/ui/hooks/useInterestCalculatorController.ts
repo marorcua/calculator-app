@@ -1,36 +1,25 @@
 import { useCallback, useState } from "react";
-import { usePersistence } from "@/infrastructure/persistence/usePersistence";
+import { useCalculatorStore } from "@/infrastructure/state/useCalculatorStore";
 import { useCompoundInterestCalculator } from "@/application/hooks/useCompoundInterestCalculator";
 import { validateCalculatorData } from "@/domain/validation/validation";
 import {
   CalculatorData,
   CompoundingFrequency,
-  FIRE_SETTINGS,
 } from "@/domain/models/calculator";
 
 export const useInterestCalculatorController = () => {
-  const [data, setData, isLoaded] = usePersistence<CalculatorData>(
-    "interest_data",
-    {
-      principal: "10000",
-      rate: "5",
-      years: "10",
-      frequency: "monthly",
-      withdrawalRate: (FIRE_SETTINGS.withdrawalRate * 100).toString(),
-      taxRate: (FIRE_SETTINGS.taxRate * 100).toString(),
-    },
-  );
+  const { investmentData, setInvestmentField, isLoaded } = useCalculatorStore();
   const [showConditions, setShowConditions] = useState(false);
 
-  const result = useCompoundInterestCalculator(data);
-  const errors = validateCalculatorData(data);
-  const principal = parseFloat(data.principal) || 0;
+  const result = useCompoundInterestCalculator(investmentData);
+  const errors = validateCalculatorData(investmentData);
+  const principal = parseFloat(investmentData.principal) || 0;
 
   const updateField = useCallback(
     (field: keyof CalculatorData, value: string) => {
-      setData((prev) => ({ ...prev, [field]: value }));
+      setInvestmentField(field, value);
     },
-    [setData],
+    [setInvestmentField],
   );
 
   const handlePrincipalChange = useCallback(
@@ -55,7 +44,7 @@ export const useInterestCalculatorController = () => {
   );
 
   return {
-    data,
+    data: investmentData,
     isLoaded,
     showConditions,
     setShowConditions,
